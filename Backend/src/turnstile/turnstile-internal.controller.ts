@@ -1,8 +1,8 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common'
-import { IsIn, IsISO8601, IsString, MinLength } from 'class-validator'
+import { IsIn, IsOptional, IsString, MinLength } from 'class-validator'
 import { TurnstileService } from './turnstile.service'
 import { InternalApiKeyGuard } from './internal-api-key.guard'
-class IngestDto {
+export class IngestDto {
   @IsString()
   @MinLength(1)
   deviceIp: string
@@ -11,12 +11,20 @@ class IngestDto {
   @MinLength(1)
   cardId: string
 
-  @IsISO8601()
+  /** Hikvision: turli ISO / oddiy qator — `new Date()` bilan yoziladi */
+  @IsString()
+  @MinLength(4)
   timestamp: string
 
-  /** E’tiborsiz: backend qurilma IP bo‘yicha in/out ni o‘zi aniqlaydi */
+  /** Bo‘lmasa qurilma yo‘nalishi (seed) bo‘yicha */
+  @IsOptional()
   @IsIn(['entry', 'exit'])
-  eventType: 'entry' | 'exit'
+  eventType?: 'entry' | 'exit'
+
+  /** Yangi xodim yaratilganda (Hikvision `name`) */
+  @IsOptional()
+  @IsString()
+  fullName?: string
 }
 
 @Controller('internal/turnstile')
@@ -31,6 +39,7 @@ export class TurnstileInternalController {
       cardId: dto.cardId,
       timestamp: dto.timestamp,
       eventType: dto.eventType,
+      fullName: dto.fullName,
     })
   }
 }

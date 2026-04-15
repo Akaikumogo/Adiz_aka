@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -23,23 +24,29 @@ export class UsersController {
   constructor(private readonly users: UsersService) {}
 
   @Get('admins')
-  @Roles(Role.SUPERADMIN)
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
   listAdmins() {
     return this.users.listAdmins()
   }
 
   @Post('admins')
-  @Roles(Role.SUPERADMIN)
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
   createAdmin(@Body() dto: CreateAdminDto, @Req() req: { user: { userId: string } }) {
     return this.users.createAdmin(dto, req.user.userId)
   }
 
   @Patch('admins/:id')
-  @Roles(Role.SUPERADMIN)
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
   updateAdmin(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAdminDto,
   ) {
     return this.users.updateAdmin(id, dto)
+  }
+
+  @Delete('admins/:id')
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
+  removeAdmin(@Param('id', ParseUUIDPipe) id: string) {
+    return this.users.removeAdmin(id)
   }
 }

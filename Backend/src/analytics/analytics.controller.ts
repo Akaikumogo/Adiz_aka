@@ -22,6 +22,13 @@ class QueryDto {
   search?: string
 }
 
+class AttendanceQueryDto {
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/)
+  date?: string
+}
+
 @Controller('analytics')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.SUPERADMIN, Role.ADMIN)
@@ -64,5 +71,18 @@ export class AnalyticsController {
   @Get('efficiency-by-department')
   effByDept() {
     return this.analytics.efficiencyByDepartment()
+  }
+
+  @Get('access-turnstile')
+  accessTurnstile(@Query() q: QueryDto) {
+    const to = q.to ?? new Date().toISOString().slice(0, 10)
+    const from = q.from ?? new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10)
+    return this.analytics.accessTurnstileSummary(from, to)
+  }
+
+  @Get('attendance')
+  attendance(@Query() q: AttendanceQueryDto) {
+    const d = q.date ?? new Date().toISOString().slice(0, 10)
+    return this.analytics.attendanceForDate(d)
   }
 }

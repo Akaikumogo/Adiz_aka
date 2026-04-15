@@ -5,6 +5,8 @@ import { AccessEventEntity } from '../database/entities/access-event.entity'
 import { TurnstileService } from './turnstile.service'
 import { TurnstileSeedService } from './turnstile-seed.service'
 import { TurnstileDevicesController } from './turnstile-devices.controller'
+import { AttendanceAdminController } from './attendance-admin.controller'
+import { AttendanceInternalController } from './attendance-internal.controller'
 import { TurnstileInternalController } from './turnstile-internal.controller'
 import { InternalApiKeyGuard } from './internal-api-key.guard'
 import { EmployeesModule } from '../employees/employees.module'
@@ -16,7 +18,12 @@ import { RealtimeModule } from '../realtime/realtime.module'
     EmployeesModule,
     RealtimeModule,
   ],
-  controllers: [TurnstileDevicesController, TurnstileInternalController],
+  controllers: [
+    TurnstileDevicesController,
+    AttendanceAdminController,
+    TurnstileInternalController,
+    AttendanceInternalController,
+  ],
   providers: [TurnstileService, TurnstileSeedService, InternalApiKeyGuard],
   exports: [TurnstileService],
 })

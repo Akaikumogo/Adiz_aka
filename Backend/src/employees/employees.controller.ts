@@ -54,6 +54,25 @@ class EmployeeDto implements EmployeeInput {
   isActive?: boolean
 }
 
+class AssignDto {
+  @IsOptional()
+  @IsUUID()
+  departmentId?: string | null
+
+  @IsOptional()
+  @IsUUID()
+  roomId?: string | null
+}
+
+class BulkAssignRoomDto {
+  @IsUUID()
+  departmentId: string
+
+  @IsOptional()
+  @IsUUID()
+  roomId?: string | null
+}
+
 @Controller('employees')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.SUPERADMIN, Role.ADMIN)
@@ -83,5 +102,21 @@ export class EmployeesController {
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.svc.remove(id)
+  }
+
+  @Patch(':id/assign')
+  assign(@Param('id', ParseUUIDPipe) id: string, @Body() dto: AssignDto) {
+    return this.svc.assign(id, {
+      departmentId: dto.departmentId,
+      roomId: dto.roomId,
+    })
+  }
+
+  @Post('assign-room-by-department')
+  bulkAssignRoom(@Body() dto: BulkAssignRoomDto) {
+    return this.svc.bulkAssignRoomByDepartment(
+      dto.departmentId,
+      dto.roomId ?? null,
+    )
   }
 }

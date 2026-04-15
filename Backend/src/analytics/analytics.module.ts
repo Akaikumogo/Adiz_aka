@@ -5,6 +5,7 @@ import { EmployeeEntity } from '../database/entities/employee.entity'
 import { ComputerEntity } from '../database/entities/computer.entity'
 import { DailyAggregateEntity } from '../database/entities/daily-aggregate.entity'
 import { DepartmentEntity } from '../database/entities/department.entity'
+import { AccessEventEntity } from '../database/entities/access-event.entity'
 import { AnalyticsService } from './analytics.service'
 import { AnalyticsController } from './analytics.controller'
 import { AnalyticsCronService } from './analytics-cron.service'
@@ -17,6 +18,7 @@ import { AnalyticsCronService } from './analytics-cron.service'
       ComputerEntity,
       DailyAggregateEntity,
       DepartmentEntity,
+      AccessEventEntity,
     ]),
   ],
   controllers: [AnalyticsController],

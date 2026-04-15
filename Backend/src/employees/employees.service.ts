@@ -65,18 +65,40 @@ export class EmployeesService {
     return { ok: true }
   }
 
+  async assign(
+    id: string,
+    data: { departmentId?: string | null; roomId?: string | null },
+  ) {
+    const e = await this.findOne(id)
+    if (data.departmentId !== undefined) e.departmentId = data.departmentId
+    if (data.roomId !== undefined) e.roomId = data.roomId
+    return this.repo.save(e)
+  }
+
+  async bulkAssignRoomByDepartment(
+    departmentId: string,
+    roomId: string | null,
+  ): Promise<{ updated: number }> {
+    const res = await this.repo.update({ departmentId }, { roomId })
+    return { updated: res.affected ?? 0 }
+  }
+
   findByCardId(cardId: string) {
     const c = cardId.trim()
     return this.repo.findOne({ where: { cardId: c } })
   }
 
-  async findOrCreateByCardId(cardId: string): Promise<EmployeeEntity> {
+  async findOrCreateByCardId(
+    cardId: string,
+    displayName?: string | null,
+  ): Promise<EmployeeEntity> {
     const c = cardId.trim()
     const existing = await this.repo.findOne({ where: { cardId: c } })
     if (existing) return existing
+    const n = displayName?.trim()
     return this.repo.save(
       this.repo.create({
-        fullName: `Karta ${c}`,
+        fullName: n || `Karta ${c}`,
         departmentId: null,
         cardId: c,
         position: '',

@@ -49,4 +49,11 @@ export class UsersService {
     if (dto.isActive !== undefined) user.isActive = dto.isActive
     return this.repo.save(user)
   }
+
+  async removeAdmin(id: string): Promise<{ ok: true }> {
+    const user = await this.repo.findOne({ where: { id, role: Role.ADMIN } })
+    if (!user) throw new NotFoundException('Admin not found')
+    await this.repo.delete({ id: user.id })
+    return { ok: true }
+  }
 }

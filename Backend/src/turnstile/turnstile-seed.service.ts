@@ -16,8 +16,8 @@ export class TurnstileSeedService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const defIn = '192.168.30.2,192.168.30.3'
-    const defOut = '192.168.30.4,192.168.30.5'
+    const defIn = '192.168.30.165,192.168.30.167'
+    const defOut = '192.168.30.168,192.168.30.169'
     const ipsIn = this.parseIps(this.config.get<string>('TURNSTILE_IPS_IN', defIn))
     const ipsOut = this.parseIps(this.config.get<string>('TURNSTILE_IPS_OUT', defOut))
     for (const ip of ipsIn) await this.upsert(ip, 'in')

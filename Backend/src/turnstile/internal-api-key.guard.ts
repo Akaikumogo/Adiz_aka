@@ -13,6 +13,12 @@ export class InternalApiKeyGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const expected = this.config.get<string>('INTERNAL_API_KEY', '')
     if (!expected?.trim()) {
+      const isProd = this.config.get<string>('NODE_ENV', 'development') === 'production'
+      if (isProd) {
+        throw new UnauthorizedException(
+          'INTERNAL_API_KEY is not configured; internal routes are disabled',
+        )
+      }
       return true
     }
     const req = context.switchToHttp().getRequest<{

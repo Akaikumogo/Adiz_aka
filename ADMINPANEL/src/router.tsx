@@ -7,6 +7,7 @@ import {
 import { AppShellLayout } from './components/layout/AppShellLayout'
 import { AdminsPage } from './pages/AdminsPage'
 import { AnalyticsPage } from './pages/AnalyticsPage'
+import { AttendancePage } from './pages/AttendancePage'
 import { ComputersPage } from './pages/ComputersPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { DepartmentsPage } from './pages/DepartmentsPage'
@@ -35,6 +36,12 @@ const employeesRoute = createRoute({
   getParentRoute: () => appShellRoute,
   path: '/xodimlar',
   component: EmployeesPage,
+})
+
+const attendanceRoute = createRoute({
+  getParentRoute: () => appShellRoute,
+  path: '/yoqlama',
+  component: AttendancePage,
 })
 
 const analyticsRoute = createRoute({
@@ -88,6 +95,7 @@ const routeTree = rootRoute.addChildren([
     computersRoute,
     adminsRoute,
     employeesRoute,
+    attendanceRoute,
     analyticsRoute,
   ]),
   loginRoute,

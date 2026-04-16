@@ -39,11 +39,11 @@ export function LoginPage() {
           unCheckedChildren={<SunOutlined />}
         />
       </div>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,0.14),transparent_50%),radial-gradient(ellipse_at_bottom_left,rgba(99,102,241,0.12),transparent_45%)] dark:opacity-90" />
+      <div className="pointer-events-none absolute inset-0 bg-zinc-200/40 dark:bg-zinc-900/50" />
       <div className="relative z-[1] hidden w-1/2 flex-col justify-between border-r border-zinc-200/80 bg-white/70 p-12 backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/50 lg:flex">
         <div>
           <div className="mb-10 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-lg font-bold text-white shadow-lg shadow-blue-600/25">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-900 text-lg font-bold text-white dark:bg-blue-600">
               W
             </div>
             <div>

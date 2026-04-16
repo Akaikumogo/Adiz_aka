@@ -11,12 +11,14 @@ import { TurnstileInternalController } from './turnstile-internal.controller'
 import { InternalApiKeyGuard } from './internal-api-key.guard'
 import { EmployeesModule } from '../employees/employees.module'
 import { RealtimeModule } from '../realtime/realtime.module'
+import { CameraModule } from '../camera/camera.module'
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([TurnstileDeviceEntity, AccessEventEntity]),
     EmployeesModule,
     RealtimeModule,
+    CameraModule,
   ],
   controllers: [
     TurnstileDevicesController,

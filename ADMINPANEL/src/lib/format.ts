@@ -1,3 +1,13 @@
+/** Format seconds as "H soat M daq" / "M daq" */
+export function formatDurationSeconds(sec: number): string {
+  if (!sec || sec < 0) return '0 daq'
+  const h = Math.floor(sec / 3600)
+  const m = Math.floor((sec % 3600) / 60)
+  if (h <= 0) return `${m} daq`
+  if (m <= 0) return `${h} soat`
+  return `${h} soat ${m} daq`
+}
+
 export function minutesToHHMM(total: number): string {
   const h = Math.floor(total / 60)
   const m = total % 60

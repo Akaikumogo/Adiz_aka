@@ -1,44 +1,50 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common'
-import { IsISO8601, IsOptional, IsString, IsUUID, MinLength } from 'class-validator'
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard'
-import { RolesGuard } from '../common/guards/roles.guard'
-import { Roles } from '../common/decorators/roles.decorator'
-import { Role } from '../common/enums/role.enum'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { AppUsageEntity } from '../database/entities/app-usage.entity'
-import { WebsiteVisitEntity } from '../database/entities/website-visit.entity'
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  IsISO8601,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MinLength,
+} from 'class-validator';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/role.enum';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { AppUsageEntity } from '../database/entities/app-usage.entity';
+import { WebsiteVisitEntity } from '../database/entities/website-visit.entity';
 
 class AppUsageDto {
   @IsUUID()
-  computerId: string
+  computerId: string;
 
   @IsString()
   @MinLength(1)
-  name: string
+  name: string;
 
   @IsISO8601()
-  startedAt: string
+  startedAt: string;
 
   @IsOptional()
   @IsISO8601()
-  endedAt?: string
+  endedAt?: string;
 }
 
 class WebsiteDto {
   @IsUUID()
-  computerId: string
+  computerId: string;
 
   @IsString()
   @MinLength(1)
-  url: string
+  url: string;
 
   @IsOptional()
   @IsString()
-  title?: string
+  title?: string;
 
   @IsISO8601()
-  visitedAt: string
+  visitedAt: string;
 }
 
 @Controller('tracking')
@@ -54,16 +60,22 @@ export class AppTrackingController {
 
   @Get('apps')
   listApps(@Query('computerId') computerId?: string) {
-    const q = this.apps.createQueryBuilder('a').orderBy('a.startedAt', 'DESC').take(200)
-    if (computerId) q.where('a.computerId = :id', { id: computerId })
-    return q.getMany()
+    const q = this.apps
+      .createQueryBuilder('a')
+      .orderBy('a.startedAt', 'DESC')
+      .take(200);
+    if (computerId) q.where('a.computerId = :id', { id: computerId });
+    return q.getMany();
   }
 
   @Get('websites')
   listSites(@Query('computerId') computerId?: string) {
-    const q = this.sites.createQueryBuilder('w').orderBy('w.visitedAt', 'DESC').take(200)
-    if (computerId) q.where('w.computerId = :id', { id: computerId })
-    return q.getMany()
+    const q = this.sites
+      .createQueryBuilder('w')
+      .orderBy('w.visitedAt', 'DESC')
+      .take(200);
+    if (computerId) q.where('w.computerId = :id', { id: computerId });
+    return q.getMany();
   }
 
   @Post('apps')
@@ -75,7 +87,7 @@ export class AppTrackingController {
         startedAt: new Date(dto.startedAt),
         endedAt: dto.endedAt ? new Date(dto.endedAt) : null,
       }),
-    )
+    );
   }
 
   @Post('websites')
@@ -87,6 +99,6 @@ export class AppTrackingController {
         title: dto.title ?? null,
         visitedAt: new Date(dto.visitedAt),
       }),
-    )
+    );
   }
 }

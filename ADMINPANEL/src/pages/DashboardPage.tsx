@@ -9,6 +9,7 @@ import { SummaryCards } from '../components/SummaryCards'
 import { useAuth } from '../contexts/AuthContext'
 import { useRealtime } from '../hooks/useRealtime'
 import { apiFetch } from '../lib/api'
+import { PICKER_DATE_FORMAT } from '../lib/dateDisplay'
 import { UI } from '../lib/labels'
 import type { DailyRecord, Employee } from '../types/activity'
 
@@ -152,6 +153,7 @@ export function DashboardPage() {
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
           <DatePicker.RangePicker
             value={range}
+            format={[PICKER_DATE_FORMAT, PICKER_DATE_FORMAT]}
             onChange={(v) => v && v[0] && v[1] && setRange([v[0], v[1]])}
             suffixIcon={<CalendarOutlined />}
             allowClear={false}

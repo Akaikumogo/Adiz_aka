@@ -1,7 +1,10 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined, SyncOutlined } from '@ant-design/icons'
+import { CalendarOutlined, DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, SyncOutlined } from '@ant-design/icons'
 import {
   App,
   Button,
+  DatePicker,
+  Descriptions,
+  Drawer,
   Form,
   Input,
   Modal,
@@ -10,14 +13,18 @@ import {
   Space,
   Spin,
   Table,
+  Tag,
   Typography,
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import dayjs from 'dayjs'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { apiFetch } from '../lib/api'
+import { PICKER_DATE_FORMAT } from '../lib/dateDisplay'
 import { UI } from '../lib/labels'
+import type { ComputerDayReport } from '../types/analytics'
 
 type Emp = { id: string; fullName: string }
 type Room = { id: string; name: string }
@@ -37,6 +44,8 @@ export function ComputersPage() {
   const { message } = App.useApp()
   const qc = useQueryClient()
   const [open, setOpen] = useState(false)
+  const [detail, setDetail] = useState<ComputerRow | null>(null)
+  const [detailDate, setDetailDate] = useState(() => dayjs())
   const [editing, setEditing] = useState<ComputerRow | null>(null)
   const [form] = Form.useForm<{
     macAddress?: string
@@ -125,6 +134,17 @@ export function ComputersPage() {
     onError: (e: Error) => message.error(e.message),
   })
 
+  const detailDateStr = detailDate.format('YYYY-MM-DD')
+
+  const { data: dayReport, isLoading: dayLoading } = useQuery({
+    queryKey: ['computer-day', detail?.id, detailDateStr],
+    queryFn: () =>
+      apiFetch<ComputerDayReport>(
+        `/api/analytics/computers/${detail!.id}/day?date=${encodeURIComponent(detailDateStr)}`,
+      ),
+    enabled: bootstrapped && isAuthenticated && !!detail?.id,
+  })
+
   const rotateMut = useMutation({
     mutationFn: (id: string) =>
       apiFetch<{ machineToken: string; warning?: string }>(`/api/computers/${id}/rotate-token`, {
@@ -165,9 +185,20 @@ export function ComputersPage() {
     {
       title: UI.colActions,
       key: 'a',
-      width: 200,
+      width: 260,
       render: (_, r) => (
         <Space wrap>
+          <Button
+            type="link"
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => {
+              setDetail(r)
+              setDetailDate(dayjs())
+            }}
+          >
+            Batafsil
+          </Button>
           <Button
             type="link"
             size="small"
@@ -270,6 +301,79 @@ export function ComputersPage() {
           </Button>
         </Form>
       </Modal>
+
+      <Drawer
+        title={UI.computerDetailTitle}
+        width={560}
+        open={!!detail}
+        onClose={() => setDetail(null)}
+        destroyOnClose
+        extra={
+          <DatePicker
+            value={detailDate}
+            onChange={(d) => d && setDetailDate(d)}
+            format={PICKER_DATE_FORMAT}
+            allowClear={false}
+            suffixIcon={<CalendarOutlined />}
+            disabledDate={(d) => d.isAfter(dayjs(), 'day')}
+          />
+        }
+      >
+        {detail && (
+          <div className="space-y-6">
+            <Descriptions bordered size="small" column={1}>
+              <Descriptions.Item label={UI.colComputerName}>{detail.name}</Descriptions.Item>
+              <Descriptions.Item label={UI.colMac}>
+                <span className="font-mono text-xs">{detail.macAddress}</span>
+              </Descriptions.Item>
+              <Descriptions.Item label={UI.colEmployee}>
+                {detail.employee?.fullName ?? '—'}
+              </Descriptions.Item>
+              <Descriptions.Item label={UI.colRoomName}>{detail.room?.name ?? '—'}</Descriptions.Item>
+              <Descriptions.Item label={UI.colLastSeen}>
+                {detail.lastSeenAt ? new Date(detail.lastSeenAt).toLocaleString() : '—'}
+              </Descriptions.Item>
+            </Descriptions>
+
+            {dayLoading ? (
+              <div className="flex justify-center py-8">
+                <Spin />
+              </div>
+            ) : dayReport ? (
+              <>
+                <div>
+                  <Typography.Text type="secondary" className="text-xs uppercase">
+                    {detailDateStr}
+                  </Typography.Text>
+                  <div className="mt-2 flex flex-wrap gap-3">
+                    <Tag>Jami hodisalar: {dayReport.totalEvents}</Tag>
+                    <Tag color="success">working: {dayReport.byStatus.working}</Tag>
+                    <Tag color="warning">idle: {dayReport.byStatus.idle}</Tag>
+                    <Tag>break: {dayReport.byStatus.break}</Tag>
+                  </div>
+                </div>
+                <div>
+                  <Typography.Title level={5} className="!mb-2 !text-base !font-semibold">
+                    {UI.activitySamples}
+                  </Typography.Title>
+                  <div className="max-h-64 space-y-1 overflow-y-auto rounded-lg border border-zinc-200/90 p-2 font-mono text-xs dark:border-zinc-700">
+                    {dayReport.samples.length === 0 ? (
+                      <Typography.Text type="secondary">{UI.noData}</Typography.Text>
+                    ) : (
+                      dayReport.samples.map((s, i) => (
+                        <div key={`${s.at}-${i}`} className="flex justify-between gap-2">
+                          <span>{new Date(s.at).toLocaleTimeString()}</span>
+                          <span>{s.status}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : null}
+          </div>
+        )}
+      </Drawer>
     </>
   )
 }

@@ -18,6 +18,7 @@ import { AnalyticsModule } from './analytics/analytics.module'
 import { RealtimeModule } from './realtime/realtime.module'
 import { NvrModule } from './nvr/nvr.module'
 import { AppTrackingModule } from './app-tracking/app-tracking.module'
+import { FilesModule } from './files/files.module'
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { AppTrackingModule } from './app-tracking/app-tracking.module'
     AnalyticsModule,
     NvrModule,
     AppTrackingModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,18 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
-import { EmployeeEntity } from '../database/entities/employee.entity'
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { EmployeeEntity } from '../database/entities/employee.entity';
 
 export interface EmployeeInput {
-  fullName: string
-  avatarUrl?: string | null
-  departmentId?: string | null
-  position?: string
-  cardId?: string | null
-  roomId?: string | null
-  workStart?: string
-  workEnd?: string
-  isActive?: boolean
+  fullName: string;
+  avatarUrl?: string | null;
+  departmentId?: string | null;
+  position?: string;
+  cardId?: string | null;
+  roomId?: string | null;
+  workStart?: string;
+  workEnd?: string;
+  isActive?: boolean;
 }
 
 @Injectable()
@@ -26,16 +26,16 @@ export class EmployeesService {
     return this.repo.find({
       relations: ['department', 'room'],
       order: { fullName: 'ASC' },
-    })
+    });
   }
 
   async findOne(id: string) {
     const e = await this.repo.findOne({
       where: { id },
       relations: ['department', 'room'],
-    })
-    if (!e) throw new NotFoundException()
-    return e
+    });
+    if (!e) throw new NotFoundException();
+    return e;
   }
 
   create(data: EmployeeInput) {
@@ -51,51 +51,61 @@ export class EmployeesService {
         workEnd: data.workEnd ?? '18:00',
         isActive: data.isActive ?? true,
       }),
-    )
+    );
   }
 
   async update(id: string, data: Partial<EmployeeInput>) {
-    const e = await this.findOne(id)
-    Object.assign(e, data)
-    return this.repo.save(e)
+    const e = await this.findOne(id);
+    Object.assign(e, data);
+    return this.repo.save(e);
   }
 
   async remove(id: string) {
-    await this.repo.delete(id)
-    return { ok: true }
-  }
+    await this.repo.manager.transaction(async (manager) => {
+      // Delete dependent records first to satisfy the FK constraint
+      await manager
+        .createQueryBuilder()
+        .delete()
+        .from('access_events')
+        .where('employee_id = :id', { id })
+        .execute();
 
+      await manager.delete(EmployeeEntity, id);
+    });
+
+    return { ok: true };
+  }
   async assign(
     id: string,
     data: { departmentId?: string | null; roomId?: string | null },
   ) {
-    const e = await this.findOne(id)
-    if (data.departmentId !== undefined) e.departmentId = data.departmentId
-    if (data.roomId !== undefined) e.roomId = data.roomId
-    return this.repo.save(e)
+    const e = await this.findOne(id);
+    if (data.departmentId !== undefined) e.departmentId = data.departmentId;
+    if (data.roomId !== undefined) e.roomId = data.roomId;
+    return this.repo.save(e);
   }
 
   async bulkAssignRoomByDepartment(
     departmentId: string,
     roomId: string | null,
   ): Promise<{ updated: number }> {
-    const res = await this.repo.update({ departmentId }, { roomId })
-    return { updated: res.affected ?? 0 }
+    const res = await this.repo.update({ departmentId }, { roomId });
+    return { updated: res.affected ?? 0 };
   }
 
   findByCardId(cardId: string) {
-    const c = cardId.trim()
-    return this.repo.findOne({ where: { cardId: c } })
+    const c = cardId.trim();
+    return this.repo.findOne({ where: { cardId: c } });
   }
 
   async findOrCreateByCardId(
     cardId: string,
     displayName?: string | null,
   ): Promise<EmployeeEntity> {
-    const c = cardId.trim()
-    const existing = await this.repo.findOne({ where: { cardId: c } })
-    if (existing) return existing
-    const n = displayName?.trim()
+    const c = cardId.trim();
+    const existing = await this.repo.findOne({ where: { cardId: c } });
+    if (existing) return existing;
+    const n = displayName?.trim();
     return this.repo.save(
       this.repo.create({
         fullName: n || `Karta ${c}`,
@@ -106,6 +116,6 @@ export class EmployeesService {
         workEnd: '18:00',
         isActive: true,
       }),
-    )
+    );
   }
 }
